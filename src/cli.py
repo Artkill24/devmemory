@@ -145,3 +145,86 @@ def init():
 
 if __name__ == '__main__':
     cli()
+@cli.command()
+@click.option('--days', default=1, help='Number of recent days')
+def recent(days):
+"""Show recent decisions (default: today)"""
+try:
+from datetime import timedelta
+dm = DevMemory()
+cutoff = datetime.now() - timedelta(days=days)
+decisions = dm.session.query(DecisionModel).filter(
+DecisionModel.created_at >= cutoff
+).order_by(DecisionModel.created_at.desc()).all()
+    if not decisions:
+        console.print(f"📭 No decisions in the last {days} day(s)", style="yellow")
+    else:
+        console.print(f"\n🕐 Recent Decisions (last {days} day(s))\n", style="bold blue")
+        for d in decisions:
+            console.print(f"[cyan]{d.created_at.strftime('%H:%M')}[/cyan] "
+                         f"[magenta]{d.decision_type.replace('_', ' ').title()}[/magenta]")
+            console.print(f"  {d.title}")
+    dm.close()
+except Exception as e:
+    console.print(f"❌ Error: {e}", style="bold red")
+    sys.exit(1)
+
+@cli.command()
+@click.option('--days', default=90, help='Number of days to show')
+def timeline(days):
+    """Show visual timeline of decisions"""
+    try:
+        from datetime import timedelta
+        from collections import defaultdict
+        
+        dm = DevMemory()
+        cutoff = datetime.now() - timedelta(days=days)
+        decisions = dm.session.query(DecisionModel).filter(
+            DecisionModel.created_at >= cutoff
+        ).order_by(DecisionModel.created_at.asc()).all()
+        
+        if not decisions:
+            console.print("No decisions in this time period", style="yellow")
+            dm.close()
+            return
+        
+        # Group by month
+        by_month = defaultdict(list)
+        for d in decisions:
+            month_key = d.created_at.strftime('%Y-%m')
+            by_month[month_key].append(d)
+        
+        console.print(f"\n📅 Decision Timeline (last {days} days)\n", style="bold cyan")
+        
+        for month in sorted(by_month.keys()):
+            month_decisions = by_month[month]
+            month_name = datetime.strptime(month, '%Y-%m').strftime('%B %Y')
+            
+            console.print(f"\n{month_name}", style="bold yellow")
+            console.print("─" * 60)
+            
+            for d in month_decisions:
+                type_emoji = {
+                    'dependency_added': '📦',
+                    'architecture_change': '🏗️',
+                    'security_fix': '🔒',
+                    'performance_optimization': '⚡',
+                    'workaround': '🔧',
+                    'config_change': '⚙️',
+                    'api_design': '🔌',
+                    'database_schema': '🗄️'
+                }.get(d.decision_type, '📝')
+                
+                date_str = d.created_at.strftime('%d')
+                console.print(
+                    f"  {date_str} │ {type_emoji} {d.title[:50]}" + 
+                    ("..." if len(d.title) > 50 else ""),
+                    style="dim"
+                )
+        
+        console.print(f"\n\nTotal: {len(decisions)} decisions", style="bold green")
+        dm.close()
+        
+    except Exception as e:
+        console.print(f"❌ Error: {e}", style="bold red")
+        sys.exit(1)
