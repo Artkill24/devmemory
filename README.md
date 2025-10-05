@@ -1,37 +1,49 @@
 # 🧠 DevMemory
 
+![Python](https://img.shields.io/badge/python-3.11+-blue.svg)
+![License](https://img.shields.io/badge/license-MIT-green.svg)
+![Status](https://img.shields.io/badge/status-MVP-orange.svg)
+[![GitHub stars](https://img.shields.io/github/stars/Artkill24/devmemory)](https://github.com/Artkill24/devmemory/stargazers)
+
 **Never forget why you made that decision.**
 
-DevMemory automatically tracks and documents important decisions in your codebase by analyzing commits. It creates a searchable timeline that helps both current and future team members understand the context behind technical choices.
+Automatically track and document technical decisions by analyzing your Git commits. DevMemory creates a searchable timeline of "why" behind your code changes.
 
-## 🎯 The Problem We Solve
+## 🎯 The Problem
 
-- "Why did we choose Redis over Memcached?"
-- "What was the reasoning behind this workaround?"
-- "Who understands the authentication system?"
+After 6 months, nobody remembers:
+- Why we chose Redis over Memcached
+- The reasoning behind that workaround
+- Who understands the authentication system
 
-After 6 months, context disappears. DevMemory preserves it automatically.
+DevMemory preserves this context automatically.
 
 ## ✨ Features
 
-- 🔍 **Automatic Analysis** - Scans commits for decision patterns
-- 📊 **9 Decision Types** - Dependencies, refactors, workarounds, security fixes, etc.
-- 🎯 **Smart Detection** - Keyword + file pattern matching with confidence scoring
+- 🔍 **Auto-detection** - Scans commits for 9 decision types
 - 💾 **SQLite Storage** - Lightweight, portable database
-- 🎨 **Beautiful CLI** - Rich terminal interface with tables and colors
-- 🔎 **Search & Filter** - Find decisions by keyword, type, or author
+- 🎨 **Beautiful CLI** - Rich terminal interface
+- 📊 **Analytics** - Statistics and insights
+- 📄 **Export** - Generate Markdown documentation
+- 🔎 **Search** - Find decisions by keyword
 
 ## 🚀 Quick Start
 ```bash
-# Clone and install
-git clone https://github.com/yourusername/devmemory.git
+git clone https://github.com/Artkill24/devmemory.git
 cd devmemory
+python3 -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
 pip install -r requirements.txt
 
-# Analyze your repository
 python src/cli.py analyze --days 30
+python src/cli.py list
+📊 Decision Types
+TypeKeywordsConfidenceDependency Addedadd, install, upgrade90%Architecture Changerefactor, redesign80%Workaroundhack, temporary85%Performanceoptimize, cache70%Security Fixvulnerability, CVE95%+ 4 more types...
+📖 Usage
+bash# Analyze repository
+python src/cli.py analyze --days 365
 
-# View decisions
+# List all decisions
 python src/cli.py list
 
 # Search
@@ -40,41 +52,31 @@ python src/cli.py search "redis"
 # Statistics
 python src/cli.py stats
 
-# Details
+# Show details
 python src/cli.py show 1
-📊 Decision Types Detected
-TypeKeywordsExamplesDependency Addedadd, install, upgradeAdding Redis, upgrading DjangoArchitecture Changerefactor, redesign, migrateMoving to microservicesWorkaroundhack, temporary, hotfixQuick fix for memory leakPerformanceoptimize, cache, fasterAdding caching layerSecurity Fixsecurity, vulnerabilityPatching XSS vulnerabilityConfig Changeconfig, settingsUpdating environment variablesAPI Designendpoint, route, interfaceNew REST endpointsDatabase Schemamigration, schema, tableAdding user tableDependency Removedremove, uninstallDropping unused library
-🏗️ Architecture
-devmemory/
-├── src/
-│   ├── analyzer/
-│   │   ├── git_analyzer.py       # Git repository scanner
-│   │   └── decision_detector.py  # Pattern matching engine
-│   ├── storage/
-│   │   └── models.py             # SQLAlchemy models
-│   ├── devmemory.py              # Core integration
-│   └── cli.py                    # Command-line interface
-├── tests/
-└── devmemory.db                  # SQLite database (created on first run)
-🧪 How It Works
 
-Scans Git History - Analyzes commit messages and changed files
-Pattern Matching - Detects keywords and file patterns
-Confidence Scoring - Calculates decision confidence (0-100%)
-Stores Context - Saves to SQLite with full metadata
-Rich Queries - Search, filter, and explore decisions
-
-📈 Example Output
+# Export to Markdown
+python src/cli.py export --output DECISIONS.md
+🎬 Example Output
 DevMemory Decisions (2 shown)
-┏━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━┳━━━━━━━━┓
-┃ Date       ┃ Type               ┃ Author       ┃ Title          ┃ Hash   ┃
-┡━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━╇━━━━━━━━┩
-│ 2025-10-05 │ Architecture Change│ Developer    │ Switch to JWT  │ 6387e8 │
-│ 2025-10-05 │ Dependency Added   │ Developer    │ Add Redis      │ 2def04 │
-└────────────┴────────────────────┴──────────────┴────────────────┴────────┘
+┏━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━┳━━━━━━━━━━━━━━┳━━━━━━━━┓
+┃ Date     ┃ Type               ┃ Author   ┃ Title        ┃ Hash   ┃
+┡━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━╇━━━━━━━━━━━━━━╇━━━━━━━━┩
+│ 2025-10  │ Architecture Change│ Dev      │ Switch to JWT│ 6387e8 │
+│ 2025-10  │ Dependency Added   │ Dev      │ Add Redis    │ 2def04 │
+└──────────┴────────────────────┴──────────┴──────────────┴────────┘
 🤝 Contributing
-This is an experimental project solving a real problem. Contributions welcome!
-📄 License
-MIT License
+Contributions welcome! See CONTRIBUTING.md
+Ideas:
 
-Created with Claude - An AI assistant experiment in solving developer pain points
+New decision patterns
+Export formats (PDF, JSON)
+Web interface
+GitHub Actions integration
+
+📄 License
+MIT License - See LICENSE
+🙏 Acknowledgments
+Created as an experiment in solving real developer pain points using AI-assisted development.
+
+Star ⭐ this repo if you find it useful!

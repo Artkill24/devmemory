@@ -97,3 +97,35 @@ def init():
 
 if __name__ == '__main__':
     cli()
+
+@cli.command()
+@click.option('--format', default='markdown', help='Export format (markdown/json)')
+@click.option('--output', default='DECISIONS.md', help='Output file')
+def export(format, output):
+    """Export decisions to file"""
+    try:
+        if format == 'markdown':
+            from storage.models import Decision as DecisionModel
+            dm = DevMemory()
+            decisions = dm.session.query(DecisionModel).order_by(DecisionModel.created_at.desc()).all()
+            
+            with open(output, 'w') as f:
+                f.write(f"# Project Decisions\n\n")
+                f.write(f"Generated: {datetime.now().strftime('%Y-%m-%d %H:%M')}\n\n")
+                f.write(f"Total: {len(decisions)}\n\n---\n\n")
+                
+                for d in decisions:
+                    f.write(f"## {d.title}\n\n")
+                    f.write(f"- **Type:** {d.decision_type.replace('_', ' ').title()}\n")
+                    f.write(f"- **Author:** {d.author}\n")
+                    f.write(f"- **Date:** {d.created_at.strftime('%Y-%m-%d')}\n")
+                    f.write(f"- **Commit:** `{d.commit_hash}`\n\n")
+                    f.write(f"{d.summary}\n\n---\n\n")
+            
+            dm.close()
+            console.print(f"✅ Exported {len(decisions)} decisions to {output}", style="green")
+        else:
+            console.print("❌ Only markdown format supported currently", style="red")
+    except Exception as e:
+        console.print(f"❌ Error: {e}", style="bold red")
+        sys.exit(1)
