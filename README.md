@@ -11,19 +11,19 @@ Automatically track and document technical decisions by analyzing Git commits. C
 
 ## 🎬 See it in Action
 
-[![asciicast](https://asciinema.org/a/IL_TUO_ID.svg)](https://asciinema.org/a/IL_TUO_ID)
+[![asciicast](https://asciinema.org/a/t4kIvVJzvNDFEHjrewUsnlYYX.svg)](https://asciinema.org/a/t4kIvVJzvNDFEHjrewUsnlYYX)
 
-*2-minute demo showing analysis, search, and export*
+*2-minute demo: analyze, search, timeline, and export*
 
 ## 🚀 Quick Start
 ```bash
 git clone https://github.com/Artkill24/devmemory.git
 cd devmemory
 python3 -m venv venv
-source venv/bin/activate
+source venv/bin/activate  # Windows: venv\Scripts\activate
 pip install -r requirements.txt
 
-# Analyze your repo
+# Analyze your repository
 python src/cli.py analyze --days 30
 python src/cli.py summary
 ✨ Features
@@ -35,22 +35,39 @@ python src/cli.py summary
 📄 Export - Generate Markdown documentation
 🔎 Search - Find decisions instantly
 
-📖 Commands
-CommandDescriptionanalyzeScan repository for decisionslistShow all decisions in a tablesummaryQuick project overviewtimelineVisual chronological viewsearch <keyword>Find specific decisionsshow <id>Detailed decision viewexportGenerate Markdown reportrecentToday's decisions
+�� Commands
+CommandDescriptionanalyze --days NScan commits from last N dayslistShow all decisions in tablesummaryQuick project overview with metricstimelineVisual chronological view by monthsearch <keyword>Find specific decisionsshow <id>Full details of a decisionexportGenerate Markdown reportrecentToday's decisionsstatsStatistics by type
 📊 Decision Types Detected
-📦 Dependency Changes • 🏗️ Architecture • 🔧 Workarounds • ⚡ Performance
-🔒 Security Fixes • ⚙️ Config • 🔌 API Design • 🗄️ Database • 📝 Documentation
+TypeKeywordsConfidence📦 Dependency Addedadd, install, upgrade90%🏗️ Architecture Changerefactor, redesign, migrate80%🔧 Workaroundhack, temporary, hotfix85%⚡ Performanceoptimize, cache, faster70%🔒 Security Fixvulnerability, CVE95%⚙️ Config Changesettings, environment60%🔌 API Designendpoint, route, interface75%🗄️ Database Schemamigration, table, column85%📝 Documentationdocs, readme40%🧪 Testingtest, unittest50%
 🎯 Use Cases
 
-Onboarding - New developers understand past decisions
-Documentation - Auto-generate decision logs
-Code Reviews - Context for why things exist
-Technical Debt - Track workarounds and quick fixes
-Knowledge Transfer - Preserve team knowledge
+Onboarding - New developers understand past decisions instantly
+Documentation - Auto-generate decision logs and ADRs
+Code Reviews - Provide context for why things exist
+Technical Debt - Track workarounds and temporary solutions
+Knowledge Transfer - Preserve team knowledge automatically
 
+📈 Example Output
+DevMemory Decisions (2 shown)
+┏━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━┳━━━━━━━━━━━━┳━━━━━━━━┓
+┃ Date     ┃ Type               ┃ Author   ┃ Title      ┃ Hash   ┃
+┡━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━╇━━━━━━━━━━━━╇━━━━━━━━┩
+│ 2025-10  │ Architecture Change│ Dev      │ Switch JWT │ 6387e8 │
+│ 2025-10  │ Dependency Added   │ Dev      │ Add Redis  │ 2def04 │
+└──────────┴────────────────────┴──────────┴────────────┴────────┘
 🤝 Contributing
 Contributions welcome! See CONTRIBUTING.md
+Ideas for contributions:
+
+New decision patterns
+Export formats (PDF, JSON)
+Web interface
+GitHub Actions integration
+More tests
+
 📄 License
 MIT License - See LICENSE
+🙏 Acknowledgments
+Created as an experiment in solving real developer pain points using AI-assisted development.
 
-⭐ Star this repo if DevMemory helped you!
+⭐ Star this repo if DevMemory saved you from asking "why did we do this?"
