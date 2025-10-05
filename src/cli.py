@@ -228,3 +228,55 @@ def timeline(days):
     except Exception as e:
         console.print(f"❌ Error: {e}", style="bold red")
         sys.exit(1)
+
+@cli.command()
+def summary():
+    """Quick project overview with key metrics"""
+    try:
+        from collections import Counter
+        dm = DevMemory()
+        
+        # Get all decisions
+        all_decisions = dm.session.query(DecisionModel).all()
+        
+        if not all_decisions:
+            console.print("📭 No decisions tracked yet. Run 'analyze' first!", style="yellow")
+            dm.close()
+            return
+        
+        # Calculate metrics
+        total = len(all_decisions)
+        by_type = Counter(d.decision_type for d in all_decisions)
+        authors = Counter(d.author for d in all_decisions)
+        
+        # Date range
+        dates = [d.created_at for d in all_decisions]
+        oldest = min(dates)
+        newest = max(dates)
+        days_span = (newest - oldest).days
+        
+        # Display
+        console.print("\n" + "="*60, style="bold cyan")
+        console.print("�� DevMemory Project Summary", style="bold cyan")
+        console.print("="*60 + "\n", style="bold cyan")
+        
+        console.print(f"📦 Total Decisions: [bold]{total}[/bold]")
+        console.print(f"📅 Tracking Period: {days_span} days ({oldest.strftime('%Y-%m-%d')} to {newest.strftime('%Y-%m-%d')})")
+        console.print(f"👥 Contributors: {len(authors)}\n")
+        
+        console.print("🏆 Top Decision Types:", style="bold yellow")
+        for dtype, count in by_type.most_common(3):
+            emoji = {'dependency_added': '📦', 'architecture_change': '🏗️', 
+                    'security_fix': '🔒', 'performance_optimization': '⚡'}.get(dtype, '📝')
+            console.print(f"   {emoji} {dtype.replace('_', ' ').title()}: {count}")
+        
+        console.print(f"\n👤 Most Active:", style="bold yellow")
+        top_author, top_count = authors.most_common(1)[0]
+        console.print(f"   {top_author} ({top_count} decisions)")
+        
+        console.print("\n💡 Tip: Use 'timeline' for chronological view or 'export' for full report\n")
+        
+        dm.close()
+    except Exception as e:
+        console.print(f"❌ Error: {e}", style="bold red")
+        sys.exit(1)
