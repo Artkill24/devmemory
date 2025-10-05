@@ -4,11 +4,12 @@
 import click
 import sys
 from pathlib import Path
+from datetime import datetime
 
-# Add src to path
 sys.path.insert(0, str(Path(__file__).parent))
 
 from devmemory import DevMemory
+from storage.models import Decision as DecisionModel
 from rich.console import Console
 
 console = Console()
@@ -80,6 +81,53 @@ def stats():
         sys.exit(1)
 
 @cli.command()
+@click.option('--output', default='DECISIONS.md', help='Output file path')
+def export(output):
+    """Export decisions to Markdown file"""
+    try:
+        dm = DevMemory()
+        decisions = dm.session.query(DecisionModel).order_by(
+            DecisionModel.created_at.desc()
+        ).all()
+        
+        with open(output, 'w', encoding='utf-8') as f:
+            f.write("# Project Decisions Archive\n\n")
+            f.write(f"**Generated:** {datetime.now().strftime('%Y-%m-%d %H:%M')}\n\n")
+            f.write(f"**Total Decisions:** {len(decisions)}\n\n")
+            
+            # Group by type
+            from collections import defaultdict
+            by_type = defaultdict(list)
+            for d in decisions:
+                by_type[d.decision_type].append(d)
+            
+            f.write("## Summary by Type\n\n")
+            for dtype, items in sorted(by_type.items(), key=lambda x: len(x[1]), reverse=True):
+                f.write(f"- **{dtype.replace('_', ' ').title()}**: {len(items)}\n")
+            
+            f.write("\n---\n\n")
+            f.write("## Detailed Decisions\n\n")
+            
+            for d in decisions:
+                f.write(f"### {d.title}\n\n")
+                f.write(f"- **Type:** {d.decision_type.replace('_', ' ').title()}\n")
+                f.write(f"- **Author:** {d.author}\n")
+                f.write(f"- **Date:** {d.created_at.strftime('%Y-%m-%d')}\n")
+                f.write(f"- **Commit:** `{d.commit_hash}`\n\n")
+                f.write("**Summary:**\n\n")
+                f.write(f"{d.summary}\n\n")
+                if d.reasoning:
+                    f.write("**Analysis:**\n\n")
+                    f.write(f"{d.reasoning}\n\n")
+                f.write("---\n\n")
+        
+        dm.close()
+        console.print(f"✅ Exported {len(decisions)} decisions to {output}", style="green")
+    except Exception as e:
+        console.print(f"❌ Error: {e}", style="bold red")
+        sys.exit(1)
+
+@cli.command()
 def init():
     """Initialize DevMemory in current repository"""
     console.print("🎯 Initializing DevMemory...", style="bold green")
@@ -87,9 +135,9 @@ def init():
         dm = DevMemory()
         console.print("✅ DevMemory initialized successfully!", style="bold green")
         console.print("\nNext steps:", style="bold yellow")
-        console.print("  1. Run: python src/cli.py analyze")
+        console.print("  1. Run: python src/cli.py analyze --days 30")
         console.print("  2. View: python src/cli.py list")
-        console.print("  3. Search: python src/cli.py search <keyword>")
+        console.print("  3. Export: python src/cli.py export")
         dm.close()
     except Exception as e:
         console.print(f"❌ Error: {e}", style="bold red")
@@ -97,35 +145,3 @@ def init():
 
 if __name__ == '__main__':
     cli()
-
-@cli.command()
-@click.option('--format', default='markdown', help='Export format (markdown/json)')
-@click.option('--output', default='DECISIONS.md', help='Output file')
-def export(format, output):
-    """Export decisions to file"""
-    try:
-        if format == 'markdown':
-            from storage.models import Decision as DecisionModel
-            dm = DevMemory()
-            decisions = dm.session.query(DecisionModel).order_by(DecisionModel.created_at.desc()).all()
-            
-            with open(output, 'w') as f:
-                f.write(f"# Project Decisions\n\n")
-                f.write(f"Generated: {datetime.now().strftime('%Y-%m-%d %H:%M')}\n\n")
-                f.write(f"Total: {len(decisions)}\n\n---\n\n")
-                
-                for d in decisions:
-                    f.write(f"## {d.title}\n\n")
-                    f.write(f"- **Type:** {d.decision_type.replace('_', ' ').title()}\n")
-                    f.write(f"- **Author:** {d.author}\n")
-                    f.write(f"- **Date:** {d.created_at.strftime('%Y-%m-%d')}\n")
-                    f.write(f"- **Commit:** `{d.commit_hash}`\n\n")
-                    f.write(f"{d.summary}\n\n---\n\n")
-            
-            dm.close()
-            console.print(f"✅ Exported {len(decisions)} decisions to {output}", style="green")
-        else:
-            console.print("❌ Only markdown format supported currently", style="red")
-    except Exception as e:
-        console.print(f"❌ Error: {e}", style="bold red")
-        sys.exit(1)
