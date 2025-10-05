@@ -95,7 +95,6 @@ def export(output):
             f.write(f"**Generated:** {datetime.now().strftime('%Y-%m-%d %H:%M')}\n\n")
             f.write(f"**Total Decisions:** {len(decisions)}\n\n")
             
-            # Group by type
             from collections import defaultdict
             by_type = defaultdict(list)
             for d in decisions:
@@ -143,31 +142,30 @@ def init():
         console.print(f"❌ Error: {e}", style="bold red")
         sys.exit(1)
 
-if __name__ == '__main__':
-    cli()
 @cli.command()
 @click.option('--days', default=1, help='Number of recent days')
 def recent(days):
-"""Show recent decisions (default: today)"""
-try:
-from datetime import timedelta
-dm = DevMemory()
-cutoff = datetime.now() - timedelta(days=days)
-decisions = dm.session.query(DecisionModel).filter(
-DecisionModel.created_at >= cutoff
-).order_by(DecisionModel.created_at.desc()).all()
-    if not decisions:
-        console.print(f"📭 No decisions in the last {days} day(s)", style="yellow")
-    else:
-        console.print(f"\n🕐 Recent Decisions (last {days} day(s))\n", style="bold blue")
-        for d in decisions:
-            console.print(f"[cyan]{d.created_at.strftime('%H:%M')}[/cyan] "
-                         f"[magenta]{d.decision_type.replace('_', ' ').title()}[/magenta]")
-            console.print(f"  {d.title}")
-    dm.close()
-except Exception as e:
-    console.print(f"❌ Error: {e}", style="bold red")
-    sys.exit(1)
+    """Show recent decisions (default: today)"""
+    try:
+        from datetime import timedelta
+        dm = DevMemory()
+        cutoff = datetime.now() - timedelta(days=days)
+        decisions = dm.session.query(DecisionModel).filter(
+            DecisionModel.created_at >= cutoff
+        ).order_by(DecisionModel.created_at.desc()).all()
+        
+        if not decisions:
+            console.print(f"📭 No decisions in the last {days} day(s)", style="yellow")
+        else:
+            console.print(f"\n🕐 Recent Decisions (last {days} day(s))\n", style="bold blue")
+            for d in decisions:
+                console.print(f"[cyan]{d.created_at.strftime('%H:%M')}[/cyan] "
+                             f"[magenta]{d.decision_type.replace('_', ' ').title()}[/magenta]")
+                console.print(f"  {d.title}")
+        dm.close()
+    except Exception as e:
+        console.print(f"❌ Error: {e}", style="bold red")
+        sys.exit(1)
 
 @cli.command()
 @click.option('--days', default=90, help='Number of days to show')
@@ -188,7 +186,6 @@ def timeline(days):
             dm.close()
             return
         
-        # Group by month
         by_month = defaultdict(list)
         for d in decisions:
             month_key = d.created_at.strftime('%Y-%m')
@@ -213,7 +210,7 @@ def timeline(days):
                     'config_change': '⚙️',
                     'api_design': '🔌',
                     'database_schema': '🗄️'
-                }.get(d.decision_type, '📝')
+                }.get(d.decision_type, '��')
                 
                 date_str = d.created_at.strftime('%d')
                 console.print(
@@ -236,7 +233,6 @@ def summary():
         from collections import Counter
         dm = DevMemory()
         
-        # Get all decisions
         all_decisions = dm.session.query(DecisionModel).all()
         
         if not all_decisions:
@@ -244,20 +240,17 @@ def summary():
             dm.close()
             return
         
-        # Calculate metrics
         total = len(all_decisions)
         by_type = Counter(d.decision_type for d in all_decisions)
         authors = Counter(d.author for d in all_decisions)
         
-        # Date range
         dates = [d.created_at for d in all_decisions]
         oldest = min(dates)
         newest = max(dates)
         days_span = (newest - oldest).days
         
-        # Display
         console.print("\n" + "="*60, style="bold cyan")
-        console.print("�� DevMemory Project Summary", style="bold cyan")
+        console.print("📊 DevMemory Project Summary", style="bold cyan")
         console.print("="*60 + "\n", style="bold cyan")
         
         console.print(f"📦 Total Decisions: [bold]{total}[/bold]")
@@ -280,3 +273,6 @@ def summary():
     except Exception as e:
         console.print(f"❌ Error: {e}", style="bold red")
         sys.exit(1)
+
+if __name__ == '__main__':
+    cli()
